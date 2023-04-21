@@ -19,6 +19,7 @@ package common
 
 import (
 	"fmt"
+	"github.com/devfans/zion-sdk/contracts/native/utils"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/rlp"
@@ -109,6 +110,35 @@ func (this *EntranceParam) String() string {
 	}
 	str += "}"
 	return str
+}
+
+type ReconstructTxParam struct {
+	FromChainId uint64
+	TxHash      []byte
+	ToChainId   uint64
+}
+
+func (m *ReconstructTxParam) Encode() ([]byte, error) {
+	return utils.PackMethodWithStruct(ABI, "reconstructRippleTx", m)
+}
+
+func (m *ReconstructTxParam) EncodeRLP(w io.Writer) error {
+	return rlp.Encode(w, []interface{}{m.FromChainId, m.TxHash, m.ToChainId})
+}
+
+func (m *ReconstructTxParam) DecodeRLP(s *rlp.Stream) error {
+	var data struct {
+		FromChainId uint64
+		TxHash      []byte
+		ToChainId   uint64
+	}
+
+	if err := s.Decode(&data); err != nil {
+		return err
+	}
+
+	m.FromChainId, m.TxHash, m.ToChainId = data.FromChainId, data.TxHash, data.ToChainId
+	return nil
 }
 
 type BlackChainParam struct {
